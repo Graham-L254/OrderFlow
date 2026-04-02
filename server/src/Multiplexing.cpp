@@ -1,4 +1,4 @@
-#include "header.h"
+#include "../include/multiplexing.h"
 
 #include <vector>
 
@@ -9,9 +9,8 @@ std::map<double, int> sellOrders {};
 
 SOCKET s;
 SOCKET clientSocket;
-int i {};
 
-const long long int numSockets {5};
+const long int numSockets {5};
 
 std::vector<SOCKET> sockets (numSockets);
 fd_set sockets_set;
@@ -60,40 +59,33 @@ int main(){
     }
     try{
         while (true){
-            
-            ++w;
-            w = w % 5;
 
-            //w = 0;
+            waitTime = {0, 1};
 
-            waitTime = {0, 10};
-
-            //std::cout << "w is " << w << "\n";
+            //std::cout << sockets_set.fd_count;
 
             FD_ZERO(&sockets_set);
-
-            FD_SET(sockets[w],&sockets_set);
+            for (int w {}; w < 5; ++w)
+                FD_SET(sockets[w],&sockets_set);
             if (select(0,&sockets_set,nullptr,nullptr,&waitTime) > 0){
+                for (int i {}; i < sockets_set.fd_count; ++i) {
+                    clientSocket = accept(sockets_set.fd_array[i], NULL, NULL);
+                    
+                    char buffer[1024] = {0};
 
+                    recv(clientSocket, buffer, sizeof(buffer), 0);
+                    
+                    std::cout << buffer << "\n";
                 
-
-                clientSocket = accept(sockets_set.fd_array[0], NULL, NULL);
-                
-
-                char buffer[1024] = {0};
-
-                recv(clientSocket, buffer, sizeof(buffer), 0);
-                
-                std::cout << buffer << "\n";
+                }
             }
-
         }
+
     }catch(...){
         WSACleanup();
         std::cout << "ConnFailed";
     }
 
-    
     closesocket(clientSocket);
     WSACleanup();
     return 1;
