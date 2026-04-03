@@ -1,4 +1,4 @@
-#include "header.h"
+#include "../include/client.h"
 
 sockaddr_in clientSocket;
 SOCKET s;
