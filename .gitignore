@@ -2,3 +2,7 @@ cmake_install.cmake
 Makefile
 CMakeCache.txt
 CMakeFiles*
+client.exe
+notes.txt
+server.exe
+header.h.gch

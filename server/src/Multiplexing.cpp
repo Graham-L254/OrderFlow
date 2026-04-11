@@ -21,10 +21,46 @@ int w {};
 timeval waitTime {1,1};
 
 int main(){
+
+    connectSockets();
+
+    try{
+        while (true){
+
+            waitTime = {0, 1};
+
+            FD_ZERO(&sockets_set);
+            for (int w {}; w < 5; ++w)
+                FD_SET(sockets[w],&sockets_set);
+            if (select(0,&sockets_set,nullptr,nullptr,&waitTime) > 0){
+                for (int i {}; i < sockets_set.fd_count; ++i) {
+                    clientSocket = accept(sockets_set.fd_array[i], NULL, NULL);
+                    
+                    char buffer[1024] = {0};
+
+                    recv(clientSocket, buffer, sizeof(buffer), 0);
+                    
+                    std::cout << buffer << "\n";
+                
+                }
+            }
+        }
+
+    }catch(...){
+        WSACleanup();
+        std::cout << "ConnFailed";
+    }
+
+    closesocket(clientSocket);
+    WSACleanup();
+    return 1;
+}
+
+void connectSockets(){
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
         std::cout << "WSAStartup failed: " << WSAGetLastError() << "\n";
-        return 1;
+        return;
     }
     for (int i {}; i < numSockets; ++i){
         sockets[i] = socket(AF_INET,SOCK_STREAM, IPPROTO_TCP);
@@ -56,40 +92,18 @@ int main(){
 
 
         std::cout << "Listening on port " << 5501 + i << "\n";
+    
+        
     }
-    try{
-        while (true){
-
-            waitTime = {0, 1};
-
-            //std::cout << sockets_set.fd_count;
-
-            FD_ZERO(&sockets_set);
-            for (int w {}; w < 5; ++w)
-                FD_SET(sockets[w],&sockets_set);
-            if (select(0,&sockets_set,nullptr,nullptr,&waitTime) > 0){
-                for (int i {}; i < sockets_set.fd_count; ++i) {
-                    clientSocket = accept(sockets_set.fd_array[i], NULL, NULL);
-                    
-                    char buffer[1024] = {0};
-
-                    recv(clientSocket, buffer, sizeof(buffer), 0);
-                    
-                    std::cout << buffer << "\n";
-                
-                }
-            }
-        }
-
-    }catch(...){
-        WSACleanup();
-        std::cout << "ConnFailed";
-    }
-
-    closesocket(clientSocket);
-    WSACleanup();
-    return 1;
+    return;
 }
+
+
+
+
+
+
+
 
 
 bool createBuyOrder(double price, int PersonID){
