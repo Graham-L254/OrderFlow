@@ -15,6 +15,10 @@ add_executable(client ${CLIENT_SOURCES})
 target_include_directories(client PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/client/include")
 
 # Server executable
-file(GLOB_RECURSE SERVER_SOURCES "server/src/*.cpp")
-add_executable(server ${SERVER_SOURCES})
-target_include_directories(server PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/server/include")
+set(SERVER_SOURCES
+    server/src/source.cpp
+    server/src/userManagement.cpp
+    server/src/Multiplexing.cpp
+)
+add_executable(Multiplexing ${SERVER_SOURCES})
+target_include_directories(Multiplexing PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/server/include")

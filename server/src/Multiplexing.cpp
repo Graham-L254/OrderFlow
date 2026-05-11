@@ -2,8 +2,8 @@
 
 #include <vector>
 
-std::map<double, int> buyOrders {};
-std::map<double, int> sellOrders {};
+//std::map<double, int> buyOrders {};
+//std::map<double, int> sellOrders {};
 
 //sockaddr_in sockAddress;
 
@@ -15,10 +15,14 @@ const long int numSockets {5};
 std::vector<SOCKET> sockets (numSockets);
 fd_set sockets_set;
 
+std::unordered_map<int, *Asset> Markets {};
 
 int w {};
 
 timeval waitTime {1,1};
+
+
+
 
 int main(){
 
@@ -40,6 +44,10 @@ int main(){
 
                     recv(clientSocket, buffer, sizeof(buffer), 0);
                     
+
+
+                    interperetInput(buffer);
+
                     std::cout << buffer << "\n";
                 
                 }
@@ -98,9 +106,28 @@ void connectSockets(){
     return;
 }
 
+std::vector<std::string> interperetInput(char buffer[1024]){
+    std::vector<std::string> strings (3,"");
+    for (int i; buffer[i] != '\0'; ++i){
+        if (buffer[i] != ','){
+            strings[i] += buffer[i];
+        }else{
+            i += 1;
+        }
+    }
+
+//    createBuyOrder();
+
+    return strings;
 
 
+}
 
+int order(){
+    bool isBuy {true};
+    int amt {};
+    double price{};
+};
 
 
 

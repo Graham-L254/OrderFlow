@@ -1,5 +1,18 @@
 #include "../include/multiplexing.h"
 
+struct id{
+    int IDNum;
+    //person* person();
+
+    id(){
+        IDNum = -1;
+    }
+
+    id(int num){
+        IDNum = num;
+    }
+};
+
 struct person{
     double starting_amt;
     double cash;
@@ -43,24 +56,31 @@ struct person{
 
 struct Asset{
     // map of each price and the peaple and amount of orders there
-    std::map<double, std::queue<std::pair<int, id>>&> buyOrders, sellOrders;
-
+    std::map<double, std::queue<std::pair<int, id>>*, std::greater<double>> buyOrders;
+    std::map<double, std::queue<std::pair<int, id>>*, std::greater<double>> sellOrders;
 
     int AssetID;
 
     Asset(): buyOrders {},sellOrders {}, AssetID {}{}
 
-    void takerOrder(){
-
-    }
-
-    void makerOrder(double Price, bool buy){
-        try{
-            buyOrders[Price];
-        }catch(const std::out_of_range& e){
+    void addOrder(bool isBuy, int amount, double price, id ID){
+        if (isBuy){
+            try
+            {
+                (buyOrders.at(price))->push({amount,ID});
+            }
+            catch(const std::out_of_range& e)
+            {
+                std::queue<std::pair<int, id>> newQueue;
+                newQueue.push({price, ID});
+                buyOrders[price] = &newQueue;
+            };
+        }else{
 
         }
     }
+
+
 
 };
 
@@ -80,19 +100,8 @@ struct order{
 
 };
 
-struct id{
-    int IDNum;
-    person* person();
 
-    id(){
-        IDNum = -1;
-    }
-
-    id(int num){
-        IDNum = num;
-    }
-};
 
 struct personList{
-    
+
 };

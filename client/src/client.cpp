@@ -27,7 +27,7 @@ int main(){
 
 
     while(true){
-        std::cout << "input params: (amt, assetNum, atMarket?)";
+        std::cout << "input params: (amt, assetNum, price)";
         std::string input;
         std::cin >> input;
 

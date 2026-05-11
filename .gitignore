@@ -6,3 +6,6 @@ client.exe
 notes.txt
 server.exe
 header.h.gch
+Multiplexing.exe
+TBM.exe
+build/

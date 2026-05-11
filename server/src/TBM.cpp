@@ -2,8 +2,8 @@
 
 #include <vector>
 
-std::map<double, int> buyOrders {};
-std::map<double, int> sellOrders {};
+//std::map<double, int> buyOrders {};
+//std::map<double, int> sellOrders {};
 
 //sockaddr_in sockAddress;
 
