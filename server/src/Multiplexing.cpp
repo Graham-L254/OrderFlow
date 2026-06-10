@@ -2,9 +2,6 @@
 
 #include <vector>
 
-//std::map<double, int> buyOrders {};
-//std::map<double, int> sellOrders {};
-
 //sockaddr_in sockAddress;
 
 SOCKET s;
@@ -15,12 +12,13 @@ const long int numSockets {5};
 std::vector<SOCKET> sockets (numSockets);
 fd_set sockets_set;
 
-std::unordered_map<int, *Asset> Markets {};
+Asset market = Asset(1);
+
+//std::unordered_map<int, *Asset> Markets {};
 
 int w {};
 
 timeval waitTime {1,1};
-
 
 
 
@@ -43,12 +41,20 @@ int main(){
                     char buffer[1024] = {0};
 
                     recv(clientSocket, buffer, sizeof(buffer), 0);
+                    int amt {}, assetNum {}, price {};
                     
 
+                    std::memcpy(&amt, buffer, 4);
+                    std::memcpy(&assetNum,buffer + 4, 4);
+                    std::memcpy(&price,buffer + 8, 4);
+                    
 
-                    interperetInput(buffer);
+                    
+                    ///interperetInput(buffer);
 
-                    std::cout << buffer << "\n";
+                    std::cout << "amount:" << amt << "\n";
+                    std::cout << "assetNum:" << assetNum << "\n";
+                    std::cout << "price:" << price << "\n";
                 
                 }
             }
@@ -63,7 +69,6 @@ int main(){
     WSACleanup();
     return 1;
 }
-
 void connectSockets(){
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2,2), &wsaData) != 0) {
@@ -106,28 +111,21 @@ void connectSockets(){
     return;
 }
 
-std::vector<std::string> interperetInput(char buffer[1024]){
-    std::vector<std::string> strings (3,"");
-    for (int i; buffer[i] != '\0'; ++i){
-        if (buffer[i] != ','){
-            strings[i] += buffer[i];
-        }else{
-            i += 1;
-        }
-    }
+order interperetInput(char buffer[1024]){
+    long input = strtol(buffer, NULL, 10);
 
-//    createBuyOrder();
+    const int intBytes {sizeof(int)};
 
-    return strings;
+    std::cout << input;
+
+    order orderAdded = order(input >> intBytes * 2, (input << intBytes) << (2^intBytes),1.1);
+    
+    std::cout << (input >> intBytes * 2) << ((input << intBytes) << (2^intBytes)) << 1.1;
 
 
+    return orderAdded;
 }
 
-int order(){
-    bool isBuy {true};
-    int amt {};
-    double price{};
-};
 
 
 

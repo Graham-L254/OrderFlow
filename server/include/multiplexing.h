@@ -1,5 +1,6 @@
-#include <winsock2.h>
+#pragma once
 
+#include <winsock2.h>
 #include <map>
 #include <iostream>
 #include <charconv>
@@ -7,10 +8,11 @@
 #include <array>
 #include <vector>
 #include <queue>
-#include "../src/source.cpp"
-
+#include <functional>
+#include <cstring>
+#include "../src/source.h"
 
 void connectSockets();
-std::vector<std::string> interperetInput(char buffer[1024]);
+order interperetInput(char buffer[1024]);
 bool createOrder();
 int marketSell(int asset, int amt);

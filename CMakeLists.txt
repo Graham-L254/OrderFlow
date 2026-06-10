@@ -16,9 +16,10 @@ target_include_directories(client PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/client/in
 
 # Server executable
 set(SERVER_SOURCES
-    server/src/source.cpp
+    #server/src/source.h
     server/src/userManagement.cpp
     server/src/Multiplexing.cpp
 )
 add_executable(Multiplexing ${SERVER_SOURCES})
 target_include_directories(Multiplexing PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/server/include")
+

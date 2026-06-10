@@ -28,8 +28,10 @@ int main(){
 
     while(true){
         std::cout << "input params: (amt, assetNum, price)";
-        std::string input;
-        std::cin >> input;
+        int input[3];
+        std::cin >> input[0];
+        std::cin >> input[1];
+        std::cin >> input[2];
 
         s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -37,12 +39,17 @@ int main(){
 
         std::cout << "connected \n";
 
-        const char* message = (input.c_str());
-        std::cout << send(s, message, strlen(message), 0);
+        long long fullInput {};
 
-        std::cout << WSAGetLastError();
+        char bitInput[12];
 
-        std::cout << "sent\n";
+        std::memcpy(bitInput, &(input), 12 );
+
+        std::cout << send(s, bitInput, 12, 0) << "\n";
+
+        //std::cout << WSAGetLastError();
+
+        std::cout << "sent" << fullInput << "\n";
 
         WSASendDisconnect(s, NULL);
     }
