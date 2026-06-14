@@ -12,7 +12,7 @@ const long int numSockets {5};
 std::vector<SOCKET> sockets (numSockets);
 fd_set sockets_set;
 
-Asset market = Asset(1);
+Asset market = Asset(0);
 
 //std::unordered_map<int, *Asset> Markets {};
 
@@ -56,6 +56,11 @@ int main(){
                     std::cout << "assetNum:" << assetNum << "\n";
                     std::cout << "price:" << price << "\n";
                 
+                    if (!amt){
+                        std::cout << "invalid order, 0 size";
+                    }else{
+                        market.addOrder(amt > 0,abs(amt),price / 100.0, 0);
+                    }
                 }
             }
         }

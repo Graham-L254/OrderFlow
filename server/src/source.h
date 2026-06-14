@@ -1,6 +1,8 @@
 #pragma once
 #include "../include/multiplexing.h"
 
+using MarketBook = std::map<double, doubleEndedLinkedList>;
+
 struct id{
     int IDNum;
 
@@ -92,8 +94,8 @@ public:
         }
     }
 
-    int subtract(int amount){
-        while (start != nullptr || amount == 0){
+    int subtract(int amount, MarketBook* market, double price){
+        while (start != nullptr && amount != 0){
             amount -= start->value.first;
             if (amount > 0){
                 start->value.first = -amount;
@@ -103,9 +105,9 @@ public:
             
         }
 
-        //if (start == nullptr){
-        //    this->doubleEndedLinkedListDestructor();
-        //}
+        if (start == nullptr){
+            market->erase(price);
+        }
 
         return amount;
     }
@@ -150,13 +152,26 @@ struct Asset{
                 sellOrders[price] = doubleEndedLinkedList({amount, ID});
             };
         }
+
+
+        printMarket();
+
+        if(orderMatch(isBuy)){
+            std::cout << "\n" << "---------" << "\n";
+            printMarket();
+        }
+
+        
     }
 
     void printMarket(){
         
-        std::cout << "\n \n buyOrder: \n \n";
-        for (const auto& value : buyOrders){
+        std::cout << "\n \n sellOrders: \n \n";
+        for (const auto& value : sellOrders){
             auto* ptr = value.second.start;
+
+            std::cout << value.first << " || ";
+
             while (ptr != nullptr){
                 std::cout << "contracts: " << ptr->value.first << " ID: " << ptr->value.second.IDNum;
                 ptr = ptr->next;
@@ -164,32 +179,47 @@ struct Asset{
             std::cout << "\n";
         }
 
-        std::cout << "\n \n sellOrders: \n \n";
-        for (const auto& value : sellOrders){
+        std::cout << "\n \n buyOrder: \n \n";
+        for (const auto& value : buyOrders){
             auto* ptr = value.second.start;
+
+            std::cout << value.first << " || ";
+
             while (ptr != nullptr){
                 std::cout << "contracts: " << ptr->value.first << " ID: " << ptr->value.second.IDNum;
                 ptr = ptr->next;
             }
             std::cout << "\n";
         }
+
+
     }
 
     bool orderMatch(bool buy){
         
         double bestBuy {buyOrders.begin()->first};
         double bestSell {sellOrders.begin()->first};
-        // checks if orders will execute
-        if (bestBuy > bestSell){
+        std::cout << bestBuy;
+        std::cout << bestSell;
+        // checks if orders will execute and if there are orders
+        if (!bestBuy || !bestSell || bestBuy < bestSell){
             return false; 
         }
         else if (buy){
-            while(buyOrders.begin()->first > buyOrders.begin()->first){
-
-            }
+            std::cout << "buy condition";
+            int sizeOfBestPrice {sellOrders.begin()->second.start->value.first};
+            int tradedVolume = sizeOfBestPrice - buyOrders.begin()->second.subtract(sizeOfBestPrice, &sellOrders, bestSell);
+            sellOrders.begin()->second.subtract(tradedVolume, &buyOrders, bestBuy);
         }else if (!buy){
-
+            std::cout << "sell condition";
+            int sizeOfBestPrice {buyOrders.begin()->second.start->value.first};
+            std::cout << "con1";
+            int tradedVolume = sizeOfBestPrice - sellOrders.begin()->second.subtract(sizeOfBestPrice, &buyOrders, bestBuy);
+            std::cout << "con2";
+            buyOrders.begin()->second.subtract(tradedVolume, &sellOrders, bestSell);
+            std::cout << "con3";
         }
+        return true;
     }
 
     
