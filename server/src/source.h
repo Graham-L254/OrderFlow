@@ -112,11 +112,6 @@ public:
         return amount;
     }
 
-    //void doubleEndedLinkedListDestructor(std::map<double, doubleEndedLinkedList>* market, double price){
-    //    market->erase(price);
-        //~doubleEndedLinkedList();
-    //}
-
 };
 
 
