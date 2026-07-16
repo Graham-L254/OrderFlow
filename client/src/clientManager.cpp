@@ -3,27 +3,33 @@
 #include <cmath>
 #include "../include/client.h"
 
+void client_w_accuracy(int id, int accuracy, int range);
+
 int main(){
     int instance_num;
-    std::vector<int> {};
     std::cout << "Num Instances: ";
     std::cin >> instance_num;
+    std::vector<int> accuracies (instance_num);
     for (int i {}; i < instance_num; ++i){
-        std::cout << "accuracy for " + i;
+        std::cout << "accuracy for " <<  i;
+        std:: cin >> accuracies[i];
     }
     std::vector<std::thread> thread_vector (instance_num);
     
-    for (int i {}; i < instance_num ++i){
-        std::thread newThread = client_w_accuracy();
-        thread_vector.pushback(move(newThread));
+    for (int i {}; i < instance_num; ++i){
+        std::thread newThread(client_w_accuracy, i, accuracies[i], 5);
+        thread_vector[i] = (move(newThread));
     }
 
-    
-
-
+    for (int i {}; i < instance_num; ++i){
+        thread_vector[i].join();
+    }
 }
 
-int client_w_accuracy(int id, double accuracy){
+void client_w_accuracy(int id, int accuracy, int range){
+
+    sockaddr_in clientSocket;
+    SOCKET s;
 
     WSADATA wsaData; 
     WSAStartup(MAKEWORD(2,2), &wsaData);
@@ -43,19 +49,16 @@ int client_w_accuracy(int id, double accuracy){
 
 
     while(true){
-        std::cout << "input params: (amt, assetNum, price in cents)";
         
         int expectedPrice = 100 + std::sin(std::time(nullptr) % 20) * 20;
         int error = std::rand() % 2 * accuracy - accuracy;
 
+        bool buy {std::rand() % 100 > 50};
 
         int input[3];
-        //std::cin >> input[0];
-        input[0] = 1;
-        //std::cin >> input[1];
+        input[0] = 1 - 2* buy;
         input[1] = 0;
-        //std::cin >> input[2];
-        input[2] = expectedPrice + error;
+        input[2] = expectedPrice + error + range - 2 * buy * range;
 
         s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
@@ -75,7 +78,14 @@ int client_w_accuracy(int id, double accuracy){
 
         std::cout << "sent" << fullInput << "\n";
 
+
+
         WSASendDisconnect(s, NULL);
+
+        if (std::rand() % 1000 == 1){
+            WSACleanup();
+            return;
+        }
     }
     
     WSACleanup();

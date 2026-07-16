@@ -10,9 +10,14 @@ if(WIN32)
 endif()
 
 # Client executable
-file(GLOB_RECURSE CLIENT_SOURCES "client/src/*.cpp")
+file(GLOB_RECURSE CLIENT_SOURCES "client/src/client.cpp")
 add_executable(client ${CLIENT_SOURCES})
 target_include_directories(client PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/client/include")
+
+file(GLOB_RECURSE CLIENT_SOURCES "client/src/clientManager.cpp")
+add_executable(clientManager ${CLIENT_SOURCES})
+target_include_directories(clientManager PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/client/include")
+
 
 # Server executable
 set(SERVER_SOURCES
