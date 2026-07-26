@@ -1,9 +1,14 @@
 #include <ctime>
 #include <cstdlib>
 #include <cmath>
+#include <chrono>
 #include "../include/client.h"
 
+static bool print(false);
+
 void client_w_accuracy(int id, int accuracy, int range);
+
+const int num_runs {20'000};
 
 int main(){
     int instance_num;
@@ -16,6 +21,8 @@ int main(){
     }
     std::vector<std::thread> thread_vector (instance_num);
     
+    auto start = std::chrono::steady_clock::now();
+
     for (int i {}; i < instance_num; ++i){
         std::thread newThread(client_w_accuracy, i, accuracies[i], 5);
         thread_vector[i] = (move(newThread));
@@ -24,6 +31,12 @@ int main(){
     for (int i {}; i < instance_num; ++i){
         thread_vector[i].join();
     }
+
+    auto end = std::chrono::steady_clock::now();
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << "Elapsed: " << elapsed.count() << " ms\n";
+
 }
 
 void client_w_accuracy(int id, int accuracy, int range){
@@ -48,23 +61,25 @@ void client_w_accuracy(int id, int accuracy, int range){
 
 
 
-    while(true){
-        
-        int expectedPrice = 100 + std::sin(std::time(nullptr) % 20) * 20;
-        int error = std::rand() % 2 * accuracy - accuracy;
+    for(int i {}; i < num_runs; ++i){
 
-        bool buy {std::rand() % 100 > 50};
+        int expectedPrice = 100 + std::sin(std::time(nullptr) % 20) * 20;
+        int error = (std::rand() % 2) * 2 * accuracy - accuracy;
+
+        bool buy {std::rand() % 100 >= 50};
 
         int input[3];
         input[0] = 1 - 2* buy;
-        input[1] = 0;
+        input[1] = id;
         input[2] = expectedPrice + error + range - 2 * buy * range;
 
         s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
         connectedSocket = connect(s, (SOCKADDR*)&clientSocket, sizeof(clientSocket));
 
-        std::cout << "connected \n";
+        if (print){
+            std::cout << "connected \n";
+        }
 
         long long fullInput {};
 
@@ -72,20 +87,17 @@ void client_w_accuracy(int id, int accuracy, int range){
 
         std::memcpy(bitInput, &(input), 12 );
 
-        std::cout << send(s, bitInput, 12, 0) << "\n";
+        if (print){
+            std::cout << send(s, bitInput, 12, 0) << "\n";
 
-        //std::cout << WSAGetLastError();
-
-        std::cout << "sent" << fullInput << "\n";
-
+            std::cout << "sent" << fullInput << "\n";
+        }else{
+            send(s, bitInput, 12, 0);
+        }
 
 
         WSASendDisconnect(s, NULL);
 
-        if (std::rand() % 1000 == 1){
-            WSACleanup();
-            return;
-        }
     }
     
     WSACleanup();

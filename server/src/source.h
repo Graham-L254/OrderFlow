@@ -1,7 +1,11 @@
 #pragma once
 #include "../include/multiplexing.h"
 
-//using MarketBook = std::map<double, doubleEndedLinkedList>;
+
+// prints values every numTradesPrint 
+int numTradesPrint {5000};
+long numTrades {};
+static bool print {false};
 
 struct id{
     int IDNum;
@@ -16,16 +20,16 @@ struct id{
 };
 
 
+
 struct person{
     double starting_amt;
     double cash;
-    std::map<int, double> assets;
-    std::map<int, double> orders;
+    int assets;
     id ID {};
     static int numPeople;
 
     person(){
-        starting_amt: 1000; assets: {};
+        starting_amt = 1000; assets = 0;;
         ID = id(numPeople);
         cash = starting_amt;
         ++numPeople;
@@ -37,27 +41,10 @@ struct person{
         ID = id(numPeople);
     }
 
-    bool buyAsset(int asset, double price, float units){
-        if (cash > price * units){
-            cash = cash - price * units;
-            //createOrder();
-            return true;
-        }else{
-            return false;
-        }
-        return true;
-    };
-
-    bool sellAssetMarket(int assetNum, float amt){
-        cash = cash;
-        // + marketSell(assetNum, amt);
-        return true;
-    }
-
 
 };
-
-
+int person::numPeople = 0;
+std::vector<person> peopleList (5);
 
 class node{
 public:
@@ -106,15 +93,26 @@ public:
     }
 
     //sell subtract
-    int subtract(int amount, std::map<double, doubleEndedLinkedList>* market, double price){
+    int subtract(int amount, std::map<double, doubleEndedLinkedList, std::greater<>>* market, double price){
+
         while (start != nullptr && amount > 0){
+            int filled;
+            node* consumedNode = nullptr;
+
             if (start->value.first > amount){
+                filled = amount;
                 start->value.first -= amount;
                 amount = 0;
             } else {
-                amount -= start->value.first;
+                filled = start->value.first;
+                amount -= filled;
+                consumedNode = start;
                 start = start->next;
             }
+
+            int idNum = (consumedNode ? consumedNode : start)->value.second.IDNum;
+            peopleList[idNum].cash -= filled * price;
+            peopleList[idNum].assets += filled;
         }
         if (start == nullptr){
             market->erase(price);
@@ -123,15 +121,26 @@ public:
     }
 
     //buy subtract
-    int subtract(int amount, std::map<double, doubleEndedLinkedList, std::greater<>>* market, double price){
+    int subtract(int amount, std::map<double, doubleEndedLinkedList>* market, double price){
+
         while (start != nullptr && amount > 0){
+            int filled;
+            node* consumedNode = nullptr;
+
             if (start->value.first > amount){
+                filled = amount;
                 start->value.first -= amount;
                 amount = 0;
             } else {
-                amount -= start->value.first;
+                filled = start->value.first;
+                amount -= filled;
+                consumedNode = start;
                 start = start->next;
             }
+
+            int idNum = (consumedNode ? consumedNode : start)->value.second.IDNum;
+            peopleList[idNum].cash += filled * price;
+            peopleList[idNum].assets -= filled;
         }
         if (start == nullptr){
             market->erase(price);
@@ -150,9 +159,17 @@ struct Asset{
 
     int AssetID;
 
-    Asset(int ID): buyOrders {},sellOrders {}, AssetID {ID}{}
+    Asset(int ID): buyOrders {}, sellOrders {}, AssetID {ID}{}
 
     void addOrder(bool isBuy, int amount, double price, id ID){
+        ++numTrades;
+        if(numTrades % numTradesPrint == 0){
+            for (int i {}; i < peopleList.size(); ++i){
+                std::cout << "\nperson: " << i << ", cash: " << peopleList[i].cash << ", assets: " << peopleList[i].assets << "\n";
+                std::cout << "total min: " << peopleList[i].cash + peopleList[i].assets * buyOrders.begin()->first << " total max: " << peopleList[i].cash + peopleList[i].assets * sellOrders.begin()->first;
+            }
+            std::cout << "\n" << "-----------------------------" << "\n";
+        }
         if (isBuy){
             try
             {
@@ -175,14 +192,16 @@ struct Asset{
             };
         }
 
-
-        printMarket();
-
-        if(orderMatch(isBuy)){
-            std::cout << "\n" << "---------" << "\n";
+        if (print){
             printMarket();
-        }
 
+            if(orderMatch(isBuy)){
+                std::cout << "\n" << "---------" << "\n";
+                printMarket();
+            }
+        }else{
+            orderMatch(isBuy);
+        }
         
     }
 
@@ -221,36 +240,51 @@ struct Asset{
         
         double bestBuy {buyOrders.begin()->first};
         double bestSell {sellOrders.begin()->first};
-        std::cout << bestBuy;
-        std::cout << bestSell;
+        if (print){
+            std::cout << bestBuy;
+            std::cout << bestSell;
+        }
         // checks if orders will execute and if there are orders
         while (true){
+            if (buyOrders.empty() || sellOrders.empty()){
+                return false;
+            }
             bestBuy = buyOrders.begin()->first;
             bestSell = sellOrders.begin()->first;
-            if (!bestBuy || !bestSell || bestBuy < bestSell){
+            if (bestBuy < bestSell){
                 return false; 
             }
             else if (buy){
-                std::cout << "buy condition";
+                if (print){
+                    std::cout << "buy condition";
+                }
                 int sizeOfBestPrice {buyOrders.begin()->second.getSize()};
                 int tradedVolume = sizeOfBestPrice - sellOrders.begin()->second.subtract(sizeOfBestPrice, &sellOrders, bestSell);
                 if (tradedVolume == 0){
                     break;
                 }
-                std::cout << "traded volume: " << tradedVolume;
+                if (print){
+                    std::cout << "traded volume: " << tradedVolume;
+                }
                 buyOrders.begin()->second.subtract(tradedVolume, &buyOrders, bestSell);
             }else if (!buy){
-                std::cout << "sell condition";
+                if (print){
+                    std::cout << "sell condition";
+                }
                 int sizeOfBestPrice {sellOrders.begin()->second.getSize()};
                 int tradedVolume = sizeOfBestPrice - buyOrders.begin()->second.subtract(sizeOfBestPrice, &buyOrders, bestBuy);
                 if (tradedVolume == 0){
                     break;
                 }
-                std::cout << "traded volume: " << tradedVolume;
+                if (print){
+                    std::cout << "traded volume: " << tradedVolume;
+                }
                 sellOrders.begin()->second.subtract(tradedVolume, &sellOrders, bestBuy);
             }
         }
-        printMarket();
+        if (print){
+            printMarket();
+        }
         return true;
     }
 

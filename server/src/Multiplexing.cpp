@@ -40,26 +40,34 @@ int main(){
                     
                     char buffer[1024] = {0};
 
-                    recv(clientSocket, buffer, sizeof(buffer), 0);
-                    int amt {}, assetNum {}, price {};
+                    int totalReceived = 0;
+                    while (totalReceived < 12) {
+                        int n = recv(clientSocket, buffer + totalReceived, 12 - totalReceived, 0);
+                        if (n <= 0) {
+                            break;
+                        }
+                        totalReceived += n;
+                    }
+                    int amt {}, idNum {}, price {};
                     
 
                     std::memcpy(&amt, buffer, 4);
-                    std::memcpy(&assetNum,buffer + 4, 4);
+                    std::memcpy(&idNum,buffer + 4, 4);
                     std::memcpy(&price,buffer + 8, 4);
                     
 
                     
                     ///interperetInput(buffer);
+                    if (print){
+                        std::cout << "amount:" << amt << "\n";
+                        std::cout << "idNum:" << idNum << "\n";
+                        std::cout << "price:" << price << "\n";
+                    }
 
-                    std::cout << "amount:" << amt << "\n";
-                    std::cout << "assetNum:" << assetNum << "\n";
-                    std::cout << "price:" << price << "\n";
-                
                     if (!amt){
                         std::cout << "invalid order, 0 size";
                     }else{
-                        market.addOrder(amt > 0,abs(amt),price / 100.0, 0);
+                        market.addOrder(amt > 0,abs(amt),price / 100.0, idNum);
                     }
                 }
             }
