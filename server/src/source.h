@@ -3,9 +3,12 @@
 
 
 // prints values every numTradesPrint 
+int numTradesReset {10'000};
 int numTradesPrint {5000};
 long numTrades {};
 static bool print {false};
+
+
 
 struct id{
     int IDNum;
@@ -157,19 +160,39 @@ struct Asset{
     std::map<double, doubleEndedLinkedList, std::greater<>> buyOrders;
     std::map<double, doubleEndedLinkedList> sellOrders;
 
+    std::chrono::time_point<std::chrono::steady_clock> lastTimeRecorded;
+
     int AssetID;
 
-    Asset(int ID): buyOrders {}, sellOrders {}, AssetID {ID}{}
+    Asset(int ID): buyOrders {}, sellOrders {}, AssetID {ID}{
+        lastTimeRecorded = std::chrono::steady_clock::now();
+    }
 
     void addOrder(bool isBuy, int amount, double price, id ID){
         ++numTrades;
         if(numTrades % numTradesPrint == 0){
-            for (int i {}; i < peopleList.size(); ++i){
-                std::cout << "\nperson: " << i << ", cash: " << peopleList[i].cash << ", assets: " << peopleList[i].assets << "\n";
-                std::cout << "total min: " << peopleList[i].cash + peopleList[i].assets * buyOrders.begin()->first << " total max: " << peopleList[i].cash + peopleList[i].assets * sellOrders.begin()->first;
+            if (print){
+                for (int i {}; i < peopleList.size(); ++i){
+                    std::cout << "\nperson: " << i << ", cash: " << peopleList[i].cash << ", assets: " << peopleList[i].assets << "\n";
+                    std::cout << "total min: " << peopleList[i].cash + peopleList[i].assets * buyOrders.begin()->first << " total max: " << peopleList[i].cash + peopleList[i].assets * sellOrders.begin()->first;
+                }
+                std::cout << "\n" << "number of trades: " << numTrades << "\n" << "-----------------------------" << "\n";
             }
-            std::cout << "\n" << "-----------------------------" << "\n";
         }
+        if (numTrades % numTradesReset == 0){
+            buyOrders = {};
+            sellOrders = {};
+            std::chrono::time_point<std::chrono::steady_clock> newTime = std::chrono::steady_clock::now();
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(newTime - lastTimeRecorded);
+            std::cout << "\ntime taken for last " << numTradesReset << " trades: " << elapsed.count();
+            lastTimeRecorded = std::move(newTime);
+        }
+        if (numTrades == 1){
+            std::chrono::time_point<std::chrono::steady_clock> newTime = std::chrono::steady_clock::now();
+            //std::cout
+        }
+
+
         if (isBuy){
             try
             {

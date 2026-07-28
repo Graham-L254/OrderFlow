@@ -10,7 +10,12 @@
 #include <queue>
 #include <functional>
 #include <cstring>
+#include <vector>
+#include <thread>
+#include <mutex>
+#include <chrono>
 #include "../src/source.h"
+
 
 void connectSockets();
 order interperetInput(char buffer[1024]);

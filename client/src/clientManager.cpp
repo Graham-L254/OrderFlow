@@ -8,7 +8,7 @@ static bool print(false);
 
 void client_w_accuracy(int id, int accuracy, int range);
 
-const int num_runs {20'000};
+const int num_runs {100'000};
 
 int main(){
     int instance_num;
@@ -37,6 +37,8 @@ int main(){
 
     std::cout << "Elapsed: " << elapsed.count() << " ms\n";
 
+    
+
 }
 
 void client_w_accuracy(int id, int accuracy, int range){
@@ -60,6 +62,9 @@ void client_w_accuracy(int id, int accuracy, int range){
     SOCKET connectedSocket;
 
 
+    s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+
+    connectedSocket = connect(s, (SOCKADDR*)&clientSocket, sizeof(clientSocket));
 
     for(int i {}; i < num_runs; ++i){
 
@@ -73,9 +78,6 @@ void client_w_accuracy(int id, int accuracy, int range){
         input[1] = id;
         input[2] = expectedPrice + error + range - 2 * buy * range;
 
-        s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-        connectedSocket = connect(s, (SOCKADDR*)&clientSocket, sizeof(clientSocket));
 
         if (print){
             std::cout << "connected \n";
@@ -96,10 +98,13 @@ void client_w_accuracy(int id, int accuracy, int range){
         }
 
 
-        WSASendDisconnect(s, NULL);
+
 
     }
     
+    WSASendDisconnect(s, NULL);
+    closesocket(s);
+
     WSACleanup();
 
 }
